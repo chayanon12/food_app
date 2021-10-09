@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:food_app/pages/food/food_list_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:food_app/pages/login/login_page.dart';
 
@@ -129,7 +130,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ));
       case 1:
-        return FoodPage();
+        return FoodListPage();
       case 2:
         return ProfilePage();
       default:
