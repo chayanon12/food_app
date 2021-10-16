@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:food_app/pages/home/home.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+
 
 class LoginPage extends StatefulWidget {
   static const routeName = '/login';
@@ -12,15 +16,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  var input ='';
+  var input = '';
   String pass = '123456';
   var dot = 0;
 
-
-
   @override
   Widget build(BuildContext context) {
-
     List<Widget> iconList = [];
     for (var j = 0; j < dot; j++) {
       iconList.add(Icon(
@@ -41,29 +42,35 @@ class _LoginPageState extends State<LoginPage> {
         body: Container(
           decoration: BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage('assets/images/bck1.jpg'),
-                  fit: BoxFit.cover
-              )
+                  image: AssetImage('assets/images/bck.jpg'), fit: BoxFit.cover)
+            // gradient: LinearGradient(
+            //   // ไล่เฉดจากมุมบนซ้ายไปมุมล่างขวาของ Container
+            //   begin: Alignment.topLeft,
+            //   end: Alignment.bottomRight,
+            //   // ไล่เฉดจากสี..ไปสี..
+            //   colors: [
+            //     Colors.redAccent,
+            //     Colors.purpleAccent,
+            //   ],
+            // ),
           ),
-
           child: SafeArea(
             child: Column(
               children: [
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children:[
-                      Icon(
-                          Icons.lock_outline_rounded,
-                          size: 100,
-                          color: Colors.indigoAccent
-                      ),
+                    children: [
+                      Icon(Icons.lock_outline_rounded,
+                          size: 100, color: Colors.indigoAccent),
                       Padding(
                         padding: const EdgeInsets.all(3.0),
                         child: Text(
                           'LOGIN',
-                          style: GoogleFonts.mali(fontSize: 50,fontWeight: FontWeight.bold,color: Colors.white),
-
+                          style: GoogleFonts.mali(
+                              fontSize: 50,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
                         ),
                       ),
                       Padding(
@@ -108,35 +115,41 @@ class _LoginPageState extends State<LoginPage> {
                     }).toList(),
                   ),
                 ),
+                // Container(
+                //     color: Colors.pinkAccent,
+                //     child: Column(
+                //       children: [
+                //         for(var row=0; row<3; row++)
+                //           Row(
+                //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //             children: [
+                //               for(var col=1; col<=3; col++)
+                //                 LoginButton(number: row * 3 + col),
+                //             ],
+                //           ),
+                //       ],
+                //     )
+                // ),
               ],
             ),
           ),
-        )
-    );
+        ));
   }
+
   void _handleClickbutton(int num) {
     setState(() {
-      if (num == -1) {
+      if (input.length == 6) {
+        _login();
+      }
+      else if (num == -1) {
         input = input.substring(0, input.length - 1);
         dot--;
       } else {
         input = input + '$num';
         dot++;
       }
-      if (input.length == 6 && input != pass) {
-        input = '';
-        dot = 0;
-        return _showMaterialDialog('ERROR', 'Invalid PIN. Please try again.');
-      }else if(input.length == 6 && input == pass){
-        input = '';
-        dot = 0;
-        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
-      }
     });
-
   }
-
-
 
   void _showMaterialDialog(String title, String msg) {
     showDialog(
@@ -145,7 +158,7 @@ class _LoginPageState extends State<LoginPage> {
         return AlertDialog(
           title: Text(
             title,
-            style: GoogleFonts.mali(fontSize: 30,color: Colors.red),
+            style: GoogleFonts.mali(fontSize: 30, color: Colors.red),
           ),
           content: Text(
             msg,
@@ -155,7 +168,7 @@ class _LoginPageState extends State<LoginPage> {
             TextButton(
               child: const Text('OK'),
               style: TextButton.styleFrom(
-                textStyle: GoogleFonts.mali(color: Colors.blue,fontSize: 15),
+                textStyle: GoogleFonts.mali(color: Colors.blue, fontSize: 15),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -166,7 +179,32 @@ class _LoginPageState extends State<LoginPage> {
       },
     );
   }
+
+  Future<void> _login() async {
+    var url = Uri.parse('https://cpsu-test-api.herokuapp.com/login');
+    var response = await http.post(url, body: {'pin': input}); // asynchronous
+    if (response.statusCode == 200) {
+      Map<String, dynamic> jsonBody = json.decode(response.body);
+      String status = jsonBody['status'];
+      String? message = jsonBody['message'];
+      bool data = jsonBody['data'];
+
+
+      if (data == true) {
+        Navigator.pushReplacementNamed(context, HomePage.routeName);
+      } else {
+        _showMaterialDialog('ERROR', 'Invalid PIN. Please try again.');
+        input = '';
+        dot = 0;
+      }
+      print('Status: $status');
+      print('Message: $message');
+      print('Data: $data');
+
+    }
+  }
 }
+
 class LoginButton extends StatelessWidget {
   final int number;
   final Function(int) onClick;
@@ -189,10 +227,10 @@ class LoginButton extends StatelessWidget {
             ? null
             : BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(width: 2.0,color: Colors.white70),
+          border: Border.all(width: 2.0, color: Colors.white70),
           boxShadow: [
             BoxShadow(
-                color: Colors.red.shade900,
+                color: Colors.pink.shade100,
                 blurRadius: 10,
                 offset: Offset(5, 5),
                 spreadRadius: 1)

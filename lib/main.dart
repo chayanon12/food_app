@@ -3,6 +3,7 @@ import 'package:food_app/pages/food/food_detail.dart';
 import 'package:food_app/pages/home/home.dart';
 import 'package:food_app/pages/login/login_page.dart';
 import 'package:food_app/pages/food/food_list_page.dart';
+import 'package:food_app/pages/food/food_main_page.dart';
 void main() {
   runApp(MyApp());
 }
